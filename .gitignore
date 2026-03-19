@@ -1,0 +1,4 @@
+kubeconfig
+*.pem
+harbor/values.yaml.bak
+secrets/
