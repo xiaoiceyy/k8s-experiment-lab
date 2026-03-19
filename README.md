@@ -34,6 +34,8 @@
 - 2 个 Worker 执行 `kubeadm join`
 - 安装 Flannel CNI 网络插件
 - 验证：`kubectl get nodes` 显示全部 **Ready**
+- <img width="1571" height="273" alt="image" src="https://github.com/user-attachments/assets/1afa6880-898f-4e57-8f29-cce5f2666fd7" />
+
 
 
 ## 计划
