@@ -45,3 +45,7 @@ git clone https://github.com/xiaoiceyy/k8s-experiment-lab.git
 cd k8s-experiment-lab
 # 参考 docs/ 目录逐步执行
 
+
+### 已完成步骤
+- 安装 Helm v3.15.x
+
