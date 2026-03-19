@@ -6,13 +6,13 @@
 使用 **Kubeadm** 在 CentOS 9 / Rocky Linux 9.3 搭建 **1-Master-2-Worker** Kubernetes 集群，并部署 Harbor、Helm、Prometheus、Loki、NFS、Jenkins 等全套组件，实现一站式云原生实验环境。
 
 ## 项目结构说明
-k8s-experiment-lab/
+- k8s-experiment-lab/
 - ├── README.md                 ← 主文档（已完成步骤 + 架构图）
 - ├── docs/                     ← 详细操作流程（每一步单独 md 文件）
-- │   ├── 01-kubeadm-init.md
-- │   ├── 02-flannel.md
-- │   ├── 03-harbor.md
-- │   └── ...
+- │    ├── 01-kubeadm-init.md
+- │    ├── 02-flannel.md
+- │    ├── 03-harbor.md
+- │    └── ...
 - ├── manifests/                ← 所有自定义 YAML（Ingress、StorageClass 等）
 - ├── helm-values/              ← 所有 Helm values.yaml 自定义配置
 - ├── scripts/                  ← Groovy Pipeline、备份脚本等
