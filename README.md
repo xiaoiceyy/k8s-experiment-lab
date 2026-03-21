@@ -64,5 +64,5 @@ cd k8s-experiment-lab
 
 
 ### 已完成步骤
-- 安装 Helm v3.15.x
+- 安装 Helm v3.20.1
 
