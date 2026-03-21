@@ -1,0 +1,22 @@
+loki:
+  enabled: true
+  auth_enabled: false
+
+promtail:
+  enabled: true
+
+grafana:
+  enabled: true
+  env:
+    NO_PROXY: "loki,.svc,.cluster.local,10.96.0.0/12,localhost,127.0.0.1"
+    http_proxy: ""
+    https_proxy: "" 
+  service:
+    type: NodePort
+    nodePort: 32000   # Grafana 访问端口
+  persistence:
+    enabled: false
+    size: 5Gi
+
+serviceMonitor:
+  enabled: false

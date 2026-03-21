@@ -1,0 +1,34 @@
+# helm-values/harbor-values.yaml
+expose:
+  type: ingress
+  tls:
+    enabled: false
+  ingress:
+    hosts:
+      core: harbor.k8s.test
+    className: "nginx"
+
+externalURL: http://harbor.k8s.test
+
+persistence:
+  enabled: false
+  persistentVolumeClaim:
+    registry:
+      size: 50Gi
+    database:
+      size: 10Gi
+    redis:
+      size: 5Gi
+    trivy:
+      size: 10Gi
+
+harborAdminPassword: "050919"
+
+logLevel: info
+
+trivy:
+  enabled: false
+chartmuseum:
+  enabled: false
+notary:
+  enabled: false
