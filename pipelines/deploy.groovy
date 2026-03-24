@@ -6,26 +6,21 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: tools
-    image: imranq2/docker-kubectl:latest
+  - name: kubectl
+    image: bitnami/kubectl:1.30
     command: ["sleep"]
-    args: ["infinity"]
+    args: ["3600"]
     securityContext:
       privileged: true
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-socket
-    - mountPath: /root/.kube
-      name: kube-config
   volumes:
   - name: docker-socket
     hostPath:
       path: /var/run/docker.sock
-  - name: kube-config
-    hostPath:
-      path: /root/.kube
 '''
-            defaultContainer 'tools'
+            defaultContainer 'kubectl'
         }
     }
 
@@ -63,10 +58,10 @@ spec:
     
     post {
         success {
-            echo '✅ 流水线全流程执行成功！'
+            echo '✅ 流水线执行成功：Gitee → 构建 → Harbor → K8s 全流程完成！'
         }
         failure {
-            echo '❌ 执行失败，请查看日志'
+            echo '❌ 流水线执行失败，请查看控制台日志'
         }
     }
 }
