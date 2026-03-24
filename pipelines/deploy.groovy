@@ -10,6 +10,7 @@ spec:
     image: jenkins/inbound-agent:latest
     securityContext:
       privileged: true
+      runAsUser: 0
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-socket
@@ -20,6 +21,7 @@ spec:
     args: ["3600"]
     securityContext:
       privileged: true
+      runAsUser: 0
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-socket
@@ -53,13 +55,13 @@ spec:
                 withCredentials([usernamePassword(credentialsId: 'harbor-credential', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
                     sh "docker login 192.168.187.128:30080 -u ${HARBOR_USER} -p ${HARBOR_PASS}"
                     sh "docker push 192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER}"
-                    sh "docker logout 192.168.187.128:30080"
                 }
             }
         }
         
         stage('部署到 Kubernetes') {
             steps {
+                sh "apk add --no-cache kubectl"
                 sh "kubectl set image deployment/demo-nginx demo-nginx=192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER} -n default"
             }
         }
@@ -67,10 +69,10 @@ spec:
     
     post {
         success {
-            echo '✅ 动态Pod创建成功！Agent连接正常！全流程完成！'
+            echo '✅ 全流程成功！'
         }
         failure {
-            echo '❌ 流水线执行失败'
+            echo '❌ 执行失败'
         }
     }
 }
