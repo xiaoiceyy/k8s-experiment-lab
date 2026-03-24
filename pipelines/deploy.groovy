@@ -1,6 +1,26 @@
 pipeline {
-    agent any
-    
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:24.0.7-dind
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-socket
+  volumes:
+  - name: docker-socket
+    emptyDir: {}
+'''
+            defaultContainer 'docker'
+        }
+    }
+
     stages {
         stage('拉取 Gitee 代码') {
             steps {
