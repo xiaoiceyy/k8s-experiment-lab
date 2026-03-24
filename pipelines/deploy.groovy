@@ -8,6 +8,14 @@ spec:
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-socket
+
+  - name: tools
+    image: docker:24.0.7-cli
     command: ["sleep"]
     args: ["3600"]
     securityContext:
@@ -15,25 +23,17 @@ spec:
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-socket
+
   volumes:
   - name: docker-socket
     hostPath:
       path: /var/run/docker.sock
 '''
-            defaultContainer 'jnlp'
+            defaultContainer 'tools'
         }
     }
 
     stages {
-        stage('安装依赖工具') {
-            steps {
-                sh '''
-                    apt-get update
-                    apt-get install -y docker.io kubectl
-                '''
-            }
-        }
-
         stage('拉取 Gitee 代码') {
             steps {
                 git branch: 'main', 
@@ -53,6 +53,7 @@ spec:
                 withCredentials([usernamePassword(credentialsId: 'harbor-credential', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
                     sh "docker login 192.168.187.128:30080 -u ${HARBOR_USER} -p ${HARBOR_PASS}"
                     sh "docker push 192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER}"
+                    sh "docker logout 192.168.187.128:30080"
                 }
             }
         }
@@ -66,10 +67,10 @@ spec:
     
     post {
         success {
-            echo '✅ 官方Pod创建成功！全流程完成！'
+            echo '✅ 动态Pod创建成功！Agent连接正常！全流程完成！'
         }
         failure {
-            echo '❌ 执行失败'
+            echo '❌ 流水线执行失败'
         }
     }
 }
