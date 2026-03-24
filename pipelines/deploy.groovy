@@ -6,8 +6,8 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: kubectl
-    image: bitnami/kubectl:1.30
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
     command: ["sleep"]
     args: ["3600"]
     securityContext:
@@ -20,11 +20,20 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 '''
-            defaultContainer 'kubectl'
+            defaultContainer 'jnlp'
         }
     }
 
     stages {
+        stage('安装依赖工具') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y docker.io kubectl
+                '''
+            }
+        }
+
         stage('拉取 Gitee 代码') {
             steps {
                 git branch: 'main', 
@@ -44,7 +53,6 @@ spec:
                 withCredentials([usernamePassword(credentialsId: 'harbor-credential', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
                     sh "docker login 192.168.187.128:30080 -u ${HARBOR_USER} -p ${HARBOR_PASS}"
                     sh "docker push 192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER}"
-                    sh "docker logout 192.168.187.128:30080"
                 }
             }
         }
@@ -58,10 +66,10 @@ spec:
     
     post {
         success {
-            echo '✅ 流水线执行成功：Gitee → 构建 → Harbor → K8s 全流程完成！'
+            echo '✅ 官方Pod创建成功！全流程完成！'
         }
         failure {
-            echo '❌ 流水线执行失败，请查看控制台日志'
+            echo '❌ 执行失败'
         }
     }
 }
