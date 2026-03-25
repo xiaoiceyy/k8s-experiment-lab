@@ -1,0 +1,12 @@
+controller:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30088
+      https: 30443
+  ingressClassResource:
+    name: nginx
+    enabled: true
+  config:
+    enable-modsecurity: "false"
+    enable-owasp-core-rules: "false"

@@ -1,0 +1,11 @@
+controller:
+  serviceType: NodePort
+  service:
+    ports:
+      http:
+        port: 8080          # 容器内端口（固定8080，禁止修改）
+        nodePort: 32001     # 你要的固定NodePort（核心配置）
+  admin:
+    password: "050919"
+persistence:
+  enabled: false            # 实验环境关闭持久化，避免PVC问题

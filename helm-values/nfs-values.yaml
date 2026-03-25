@@ -1,0 +1,7 @@
+nfs:
+  server: 192.168.187.128   # 你的 master IP
+  path: /nfs/data
+
+storageClass:
+  name: nfs-storage
+  defaultClass: true

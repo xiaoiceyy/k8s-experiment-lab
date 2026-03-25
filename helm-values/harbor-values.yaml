@@ -1,33 +1,28 @@
 # helm-values/harbor-values.yaml
 expose:
-  type: ingress
+  type: nodePort
   tls:
     enabled: false
-  ingress:
-    hosts:
-      core: harbor.k8s.test
-    className: "nginx"
-
-externalURL: http://harbor.k8s.test
+  nodePort:
+    ports:
+      http:
+        port: 80
+        nodePort: 30080
+      https:
+        port: 443
+        nodeport: 30443
+externalURL: http://192.168.187.128:30080   # 必须改成你实际访问地址
 
 persistence:
   enabled: false
-  persistentVolumeClaim:
-    registry:
-      size: 50Gi
-    database:
-      size: 10Gi
-    redis:
-      size: 5Gi
-    trivy:
-      size: 10Gi
 
-harborAdminPassword: "050919"
+harborAdminPassword: "050919"   # 强烈建议改成强密码
 
 logLevel: info
 
+# 关闭不必要的组件（实验环境节省资源）
 trivy:
-  enabled: false
+  enabled: false   # 漏洞扫描，实验可先关
 chartmuseum:
   enabled: false
 notary:
