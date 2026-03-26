@@ -1,0 +1,47 @@
+grafana:
+  enabled: true
+  adminPassword: "050919"
+  sidecar:
+    dashboards:
+      enabled: false     # 关键：关闭 Sidecar，解决 CrashLoopBackOff
+    datasources:
+      enabled: false
+
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'email'
+    receivers:
+    - name: 'email'
+      email_configs:
+         - to: 'iceyy0919@163.com'          # 改成你的真实网易邮箱
+           from: 'iceyy0919@163.com'
+           smarthost: 'smtp.163.com:25'
+           auth_username: 'iceyy0919@163.com'
+           auth_password: 'QZX8rc4ZfeTnrSzi'   # ← 这里填授权码，不是登录密码
+           send_resolved: true
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    resources:
+      requests:
+        cpu: 300m
+        memory: 1Gi
+
+# 明确启用所有需要的 exporter
+kube-state-metrics:
+  enabled: true
+node-exporter:
+  enabled: true
+metrics-server:
+  enabled: true
+ingress-nginx:
+  enabled: true
