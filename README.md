@@ -64,5 +64,56 @@ cd k8s-experiment-lab
 
 
 ### 已完成步骤
-- 安装 Helm v3.20.1
+# 下载并安装 Helm v3
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh && ./get_helm.sh
+
+# 验证安装
+helm version
+
+#部署 Harbor 私有镜像仓库
+# 添加 Harbor Helm 仓库
+helm repo add harbor https://helm.goharbor.io
+helm repo update
+
+# 部署 Harbor（使用已准备好的 values 文件）
+helm install harbor harbor/harbor \
+  --namespace harbor --create-namespace \
+  -f helm-values/harbor-values.yaml
+
+# 添加 Jenkins Helm 仓库
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+
+# 部署 Jenkins（使用已准备好的 values 文件）
+helm install jenkins jenkins/jenkins \
+  --namespace jenkins --create-namespace \
+  -f helm-values/jenkins-values.yaml
+
+#部署 Loki + Grafana 日志系统
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+helm install loki grafana/loki \
+  --namespace monitoring --create-namespace \
+  -f helm-values/loki-values.yaml
+
+
+#部署 Prometheus + Grafana + Alertmanager 监控栈
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  -f helm-values/prometheus-values.yaml
+
+# 部署 Ingress-Nginx（7层网关 + 支持灰度）
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  -f helm-values/ingress-nginx-values.yaml
+
+# 部署 NFS 动态 Provisioner 并创建 StorageClass
+helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+  --namespace nfs-provisioner --create-namespace \
+  -f helm-values/nfs-values.yaml
 
