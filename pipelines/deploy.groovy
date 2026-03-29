@@ -5,74 +5,66 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
+  serviceAccountName: jenkins
   containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:latest
-    securityContext:
-      privileged: true
-      runAsUser: 0
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ["/bin/sh"]
+    args: ["-c", "sleep 3600"]
     volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-socket
-
-  - name: tools
-    image: docker:24.0.7-cli
-    command: ["sleep"]
-    args: ["3600"]
-    securityContext:
-      privileged: true
-      runAsUser: 0
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-socket
-
+    - name: docker-config
+      mountPath: /kaniko/.docker
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command: ["/bin/sh"]
+    args: ["-c", "sleep 3600"]
   volumes:
-  - name: docker-socket
-    hostPath:
-      path: /var/run/docker.sock
+  - name: docker-config
+    secret:
+      secretName: harbor-docker-config
 '''
-            defaultContainer 'tools'
         }
     }
 
     stages {
-        stage('拉取 Gitee 代码') {
+        stage('拉取代码') {
             steps {
-                git branch: 'main', 
+                git branch: 'master', 
                     credentialsId: 'gitee-credential', 
                     url: 'https://gitee.com/fwuanyan/demo-nginx-app.git'
             }
         }
         
-        stage('构建 Docker 镜像') {
+        stage('构建并推送镜像') {
             steps {
-                sh "docker build -t 192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER} ."
-            }
-        }
-        
-        stage('推送镜像到 Harbor') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'harbor-credential', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
-                    sh "docker login 192.168.187.128:30080 -u ${HARBOR_USER} -p ${HARBOR_PASS}"
-                    sh "docker push 192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER}"
+                container('kaniko') {
+                    sh """
+                    /kaniko/executor \
+                      --dockerfile=${WORKSPACE}/Dockerfile \
+                      --context=dir://${WORKSPACE} \
+                      --destination=192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER} \
+                      --insecure \
+                      --skip-tls-verify
+                    """
                 }
             }
         }
         
         stage('部署到 Kubernetes') {
             steps {
-                sh "apk add --no-cache kubectl"
-                sh "kubectl set image deployment/demo-nginx demo-nginx=192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER} -n default"
+                container('kubectl') {
+                    sh "kubectl set image deployment/demo-nginx nginx=192.168.187.128:30080/mycompany/demo-nginx:${BUILD_NUMBER} -n mycompany"
+                    sh "kubectl rollout status deployment/demo-nginx -n mycompany"
+                }
             }
         }
     }
-    
     post {
         success {
-            echo '✅ 全流程成功！'
+            echo "✅ 镜像构建推送+部署成功！镜像标签：${BUILD_NUMBER}"
         }
         failure {
-            echo '❌ 执行失败'
+            echo "❌ 构建/部署失败，请检查日志！"
         }
     }
 }
