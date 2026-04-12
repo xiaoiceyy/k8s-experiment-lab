@@ -117,3 +117,9 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
   --namespace nfs-provisioner --create-namespace \
   -f helm-values/nfs-values.yaml
 
+
+## 6. 在K8s上部署Java网站项目
+- 使用 Maven 打包 Spring Boot / Tomcat WAR 项目
+- 通过 Harbor 推送镜像 + imagePullSecrets
+- 使用 Deployment + ConfigMap + NodePort 部署
+- 详细步骤见 [docs/06-java-web-deployment.md](./docs/06-java-web-deployment.md)
